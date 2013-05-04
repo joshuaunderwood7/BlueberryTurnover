@@ -2,6 +2,9 @@
 var REG = new Array(8);
 var PC;
 var MEMORY = new Array(0x10000);
+//flags carry and overflow
+var carry = false;
+var overflow  = false;
 var halt = false;
 
 //format: SEQ Rd Rs1 Rs2
@@ -22,8 +25,14 @@ function SEQ(word)
 //result in Rd.
 function ADD(word)
 {
+    var testbit = REG[((0x0700 & word)>>8)]
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] + REG[((0x001C & word)>>2)])
-	//check overflow
+	carry = false;
+    overflow = false;
+    //check overflow/carry
+    if(REG[((0x0700 & word)>>8)] > 0xFFFF) { carry  = true; } 
+    if( ((~( REG[((0x00E0 & word)>>5)] ^ REG[((0x001C & word)>>2)] ) >> 15) == 1) && (((REG[((0x0700 & word)>>8)] ^ testbit) >> 15) == 1)) 
+    { overflow  = true; }
 	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0xFFFF;
 }
 
@@ -44,8 +53,14 @@ function SGT(word)
 //sign-extended immediate.
 function ADDI(word)
 {
+    var testbit = REG[((0x0700 & word)>>8)]
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] + (0x001F & word))
-	//check overflow
+	carry = false;
+    overflow = false;
+    //check overflow/carry
+    if(REG[((0x0700 & word)>>8)] > 0xFFFF) { carry  = true; } 
+    if( ((~( REG[((0x00E0 & word)>>5)] ^ (0x001F & word) ) >> 15) == 1) && (((REG[((0x0700 & word)>>8)] ^ testbit) >> 15) == 1)) 
+    { overflow  = true; }
 	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0xFFFF;
 }
 
@@ -55,8 +70,10 @@ function SUB(word)
 {
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] - REG[((0x001C & word)>>2)])
 	//check underflow
-	if ( REG[((0x0700 & word)>>8)] ) {
+    overflow = false;
+	if ( REG[((0x0700 & word)>>8)] < 0 ) {
 		REG[((0x0700 & word)>>8)] = 0xFFFF - REG[((0x0700 & word)>>8)];
+        overflow = true;
 	}
 }
 
@@ -189,6 +206,7 @@ function SW(word)
 function MUL(word)
 {
 	REG[((0x0700 & word)>>8)] =((REG[((0x00E0 & word)>>5)] & 0x00FF) + (REG[((0x001C & word)>>2)] & 0x00FF));
+    //check overflow
 }
 
 // UNUSED 00110 
@@ -260,15 +278,31 @@ function BNEZ(word)
 //immediate if the carry out is set.
 function BC(word)
 {
-
+    if(carry)
+    {
+        if( word & 0x0400 == 0x0400 ) 
+        { 
+            word = word | 0xF800; 
+            word = 0 - (!word + 1); 
+        }
+        PC = PC + word;
+    }
 }
 
 //BO #
 //Set PC to PC + 11-bit sign-extended
-//immediate if the overflowis set.
+//immediate if the overflow is set.
 function BO(word)
 {
-
+    if(overflow)
+    {
+        if( word & 0x0400 == 0x0400 ) 
+        { 
+            word = word | 0xF800; 
+            word = 0 - (!word + 1); 
+        }
+        PC = PC + word;
+    }
 }
 
 //NOP
@@ -280,13 +314,20 @@ function NOP(word)
 //Set the PC to PC + 11-bit sign-extended
 //immediate.
 function J(word)
-{}
+{
+        if( word & 0x0400 == 0x0400 ) 
+        { 
+            word = word | 0xF800; 
+            word = 0 - (!word + 1); 
+        }
+        PC = PC + word;
+}
 
 //JR 0 Rs
 //Set the PC to the value in register Rs.
 function JR(word)
 {
-
+    PC = REG[((0x00E0 & word)>>5)];
 }
 
 //JALR Rd #
@@ -296,7 +337,15 @@ function JR(word)
 //extended immediate.
 function JALR(word)
 {
-
+    PC = PC + 1;
+    REG[((0x0700 & word)>>8)] = PC;
+    
+    if( word & 0x0080 == 0x0080 ) 
+    { 
+        word = word | 0xFF00; 
+        word = 0 - (!word + 1); 
+    }
+    PC = PC + word;
 }
 
 //givin a 16 bit word, executes function
@@ -311,7 +360,7 @@ function EXECUTE(word)
 		case 3: ADDI(word); break;
 		case 4: SUB(word); break;
 		case 5: SLT(word); break;
-		case 6: /* Unused */ break;
+		case 6: HALT(); break;      //0x3000 is HALT for testing.
 		case 7: OR(word); break;
 		case 8: ORI(word); break;
 		case 9: AND(word); break;
@@ -343,7 +392,7 @@ function EXECUTE(word)
 function STARTCPU()
 {
 
-    document.body.addEventListener("keyup", HALT, false);
+    //document.body.addEventListener("keyup", HALT, false);
    
     for(var i = 0; i < 8; i++)
     { 
@@ -356,23 +405,43 @@ function STARTCPU()
     for(var i = 0; i < 0x10000; i++)
     { MEMORY[i] = 0; }
 
+    //0x00xx to 0xF8xx are commands 
+    
     
     
     MEMORY[0] = 0xB0FF;
     MEMORY[1] = 0xB1A4;
     MEMORY[2] = 0x4B04;
     
-    for(var i = 0; i < 3; i++)
+    
+    
+    
+    for(var i = 0; i < 45 && !halt; i++)
     {
         EXECUTE(MEMORY[PC]);
         PC++;
     }
     
+    
+   
+    for(var i = 0; i < 0x10000; i = i + 0x0800)
+    {
+        if( (i != 0x3000) ) { MEMORY[(i>>11)] = (i | 0x0028); }
+        //document.write(i.toString(16) + "<br>");
+    }
+    
+    MEMORY[42] = 0x3000;
+   
     for(var i = 0; i < 8; i++)
     { 
         document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + REG[i].toString(16));
     }
     
+    
+    for(var i = 0; i < 100; i++)
+    {
+        document.getElementById("MEMORY").innerHTML += ("[" + i.toString(16) + "] : " + MEMORY[i].toString(16) + "<br>" );
+    }
     /*
     window.addEventListener( "" , function() { halt = true; }, false)
     for(for i = 0 ; !halt || i < 0xFFFFF; i++ )
