@@ -434,8 +434,7 @@ function STARTCPU()
    
     for(var i = 0; i < 8; i++)
     { 
-        var hex = REG[i].toString(16).toUpperCase();
-        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + "0000".substr(0, 4 - hex.length) + hex + "  "); 
+        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + formatHex(REG[i]) + "  "); 
     }
     
     
@@ -445,8 +444,7 @@ function STARTCPU()
         {
             document.getElementById("MEMORY").innerHTML += "<br>";
         }
-        var hex = MEMORY[i].toString(16).toUpperCase();
-        document.getElementById("MEMORY").innerHTML += "0000".substr(0, 4 - hex.length) + hex + "  ";
+        document.getElementById("MEMORY").innerHTML += formatHex(MEMORY[i]) + "  ";
     }
     /*
     window.addEventListener( "" , function() { halt = true; }, false)
@@ -463,3 +461,8 @@ function STARTCPU()
 
 function HALT()
 {   halt = true;   }
+
+function formatHex(hexNumber)
+{
+    return "0000".substr(0, 4 - hexNumber.toString(16).length) + hexNumber.toString(16).toUpperCase(); 
+}
