@@ -1,7 +1,7 @@
 //8 16 bit registers and a 16 bit program counter
 var REG = new Array(8);
 var PC;
-var MEMORY = new Array(0x10000);
+var MEMORY = new Array(0x7FFF);
 //flags carry and overflow
 var carry = false;
 var overflow  = false;
@@ -434,13 +434,19 @@ function STARTCPU()
    
     for(var i = 0; i < 8; i++)
     { 
-        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + REG[i].toString(16));
+        var hex = REG[i].toString(16).toUpperCase();
+        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + "0000".substr(0, 4 - hex.length) + hex + "  "); 
     }
     
     
     for(var i = 0; i < 100; i++)
     {
-        document.getElementById("MEMORY").innerHTML += ("[" + i.toString(16) + "] : " + MEMORY[i].toString(16) + "<br>" );
+        if( (i%16) == 0 ) 
+        {
+            document.getElementById("MEMORY").innerHTML += "<br>";
+        }
+        var hex = MEMORY[i].toString(16).toUpperCase();
+        document.getElementById("MEMORY").innerHTML += "0000".substr(0, 4 - hex.length) + hex + "  ";
     }
     /*
     window.addEventListener( "" , function() { halt = true; }, false)
