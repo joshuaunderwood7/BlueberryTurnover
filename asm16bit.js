@@ -1,6 +1,6 @@
 function CMDresult(tokens)
 {
-    var result = 0;
+    var result = 0xE000; //Default to NOP for syntax errors
 
     if(tokens[0] == "SEQ") 
     {result = 0x0000 | (numberResult(tokens[1]) << 8) | (numberResult(tokens[2]) << 5) | (numberResult(tokens[3]) << 2);}
@@ -81,6 +81,8 @@ function PARSE()
     var lines = input.split("\n");
     var linecount = lines.length;
     var i = 0;
+
+    document.getElementById("asmOut").innerHTML = "";
 
     for( ; i < linecount; i++)
     {

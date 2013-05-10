@@ -402,10 +402,11 @@ function STARTCPU()
         REG[i] = 0; 
         document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + REG[i]);
     }
+    document.getElementById("PC").innerHTML = "PC = " + PC;
 
 
     for(var i = 0; i < 0x10000; i++)
-    { MEMORY[i] = 0; }
+    { MEMORY[i] = 0x3000; } //default all memory locations to HALT for testing
 
     //0x00xx to 0xF8xx are commands 
     
@@ -448,6 +449,7 @@ function RUNPROGRAM()
         document.getElementById("output").innerHTML += formatHex(MEMORY[PC]) + " <br />"; 
         EXECUTE(MEMORY[PC]);
         PC++;
+        document.getElementById("PC").innerHTML = "PC = " + PC;
     }
 
     for(var i = 0; i < 8; i++)
