@@ -4,6 +4,7 @@
 <head>
 
 <script type="text/javascript" src="16bit.js"></script>
+<script type="text/javascript" src="asm16bit.js"></script>
 <style type="text/css">
     div {border: 1px solid green; float: left; padding: 5px}
     p {color:green;}
@@ -28,8 +29,13 @@
   <div>
     <p id="MEMORY"> MEMORY: <br> </p>
   </div>
-  </font>
+  <div id="output">
 
+  </div>
+  <div id="asmOut"></div>
+  <input type="TEXT" id="asmInput">ADD %0 %1 %2</input>
+  <input type="BUTTON" onclick="PARSE()">click to assebmle</input>
+
+</font>
 </body>
-
 </html>

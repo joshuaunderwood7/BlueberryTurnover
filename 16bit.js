@@ -353,6 +353,10 @@ function JALR(word)
 function EXECUTE(word)
 {
 	op_code = word >> 11;
+    
+    document.getElementById("output").innerHTML += "word   := " + formatHex(word) + "<br />";
+    document.getElementById("output").innerHTML += "opcode := " + formatHex(op_code) + "<br />";
+
 	switch(op_code) {
 		case 0: SEQ(word); break;
 		case 1: ADD(word); break;
@@ -392,7 +396,6 @@ function EXECUTE(word)
 function STARTCPU()
 {
 
-    //document.body.addEventListener("keyup", HALT, false);
    
     for(var i = 0; i < 8; i++)
     { 
@@ -400,7 +403,6 @@ function STARTCPU()
         document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + REG[i]);
     }
 
-    PC = 0;
 
     for(var i = 0; i < 0x10000; i++)
     { MEMORY[i] = 0; }
@@ -408,45 +410,20 @@ function STARTCPU()
     //0x00xx to 0xF8xx are commands 
     
     
-    
-    MEMORY[0] = 0xB0FF;
-    MEMORY[1] = 0xB1A4;
-    MEMORY[2] = 0x4B04;
-    
-    
-    
-    
-    for(var i = 0; i < 45 && !halt; i++)
-    {
-        EXECUTE(MEMORY[PC]);
-        PC++;
-    }
-    
-    
-   
-    for(var i = 0; i < 0x10000; i = i + 0x0800)
-    {
-        if( (i != 0x3000) ) { MEMORY[(i>>11)] = (i | 0x0028); }
-        //document.write(i.toString(16) + "<br>");
-    }
-    
-    MEMORY[42] = 0x3000;
-   
-    for(var i = 0; i < 8; i++)
-    { 
-        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + formatHex(REG[i]) + "  "); 
-    }
-    
-    
-    for(var i = 0; i < 100; i++)
-    {
-        if( (i%16) == 0 ) 
-        {
-            document.getElementById("MEMORY").innerHTML += "<br>";
-        }
-        document.getElementById("MEMORY").innerHTML += formatHex(MEMORY[i]) + "  ";
-    }
     /*
+    MEMORY[0] = 0x1502;
+    MEMORY[1] = 0x1603;
+    MEMORY[2] = 0x0B28;
+    MEMORY[3] = 0x3000;
+   */
+
+    MEMORY[0] = 0xB202;
+    MEMORY[1] = 0xB103;
+    MEMORY[2] = 0xB28;
+    MEMORY[3] = 0xB302;
+    MEMORY[4] = 0x3000;
+
+   /*
     window.addEventListener( "" , function() { halt = true; }, false)
     for(for i = 0 ; !halt || i < 0xFFFFF; i++ )
     {
@@ -456,7 +433,39 @@ function STARTCPU()
     for( ; PC < 0x10000; PC++)
     { EXECUTE(MEMORY[PC]); }
     */
+    RUNPROGRAM();
     
+}
+
+function RUNPROGRAM()
+{
+    halt = false;
+    PC = 0;
+
+    document.getElementById("output").innerHTML = ""; 
+    for(var i = 0; i < 8000 && !halt; i++)
+    {
+        document.getElementById("output").innerHTML += formatHex(MEMORY[PC]) + " <br />"; 
+        EXECUTE(MEMORY[PC]);
+        PC++;
+    }
+
+    for(var i = 0; i < 8; i++)
+    { 
+        document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + formatHex(REG[i]) + "  "); 
+    }
+    
+    
+    document.getElementById("MEMORY").innerHTML = "";
+    for(var i = 0; i < 256; i++)
+    {
+        if( (i%16) == 0 ) 
+        {
+            document.getElementById("MEMORY").innerHTML += "<br>";
+        }
+        document.getElementById("MEMORY").innerHTML += formatHex(MEMORY[i]) + "  ";
+    }
+ 
 }
 
 function HALT()
