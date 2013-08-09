@@ -282,8 +282,7 @@ function BC(word)
     {
         if( word & 0x0400 == 0x0400 ) 
         { 
-            word = word | 0xF800; 
-            word = 0 - (!word + 1); 
+            word = 0x03FF - word;
         }
         PC = PC + word;
     }
@@ -298,8 +297,7 @@ function BO(word)
     {
         if( word & 0x0400 == 0x0400 ) 
         { 
-            word = word | 0xF800; 
-            word = 0 - (!word + 1); 
+            word = 0x03FF - word;
         }
         PC = PC + word;
     }
@@ -315,10 +313,10 @@ function NOP(word)
 //immediate.
 function J(word)
 {
-        if( word & 0x0400 == 0x0400 ) 
+        word = word & 0x07FF;
+        if( (word & 0x0400) == 0x0400 ) 
         { 
-            word = word | 0xF800; 
-            word = 0 - (!word + 1); 
+            word = 0x03FF - word;
         }
         PC = PC + word;
 }
@@ -342,8 +340,7 @@ function JALR(word)
     
     if( word & 0x0080 == 0x0080 ) 
     { 
-        word = word | 0xFF00; 
-        word = 0 - (!word + 1); 
+            word = 0x03FF - word;
     }
     PC = PC + word;
 }
