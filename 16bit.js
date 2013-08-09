@@ -335,12 +335,13 @@ function JR(word)
 //extended immediate.
 function JALR(word)
 {
-    PC = PC + 1;
     REG[((0x0700 & word)>>8)] = PC;
     
-    if( word & 0x0080 == 0x0080 ) 
+    word = word & 0x00FF;
+
+    if( (word & 0x0080) == 0x0080 ) 
     { 
-            word = 0x03FF - word;
+            word = 0x007F - word;
     }
     PC = PC + word;
 }
