@@ -61,7 +61,7 @@ function ADDI(word)
     if(REG[((0x0700 & word)>>8)] > 0xFFFF) { carry  = true; } 
     if( ((~( REG[((0x00E0 & word)>>5)] ^ (0x001F & word) ) >> 15) == 1) && (((REG[((0x0700 & word)>>8)] ^ testbit) >> 15) == 1)) 
     { overflow  = true; }
-	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0xFFFF;
+	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0x0FFFF;
 }
 
 //SUB Rd Rs1 Rs2
@@ -71,8 +71,9 @@ function SUB(word)
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] - REG[((0x001C & word)>>2)])
 	//check underflow
     overflow = false;
-	if ( REG[((0x0700 & word)>>8)] < 0 ) {
-		REG[((0x0700 & word)>>8)] = 0xFFFF - REG[((0x0700 & word)>>8)];
+	if ( (REG[((0x0700 & word)>>8)] & 0x10000 ) == 0x10000 ) {
+		REG[((0x0700 & word)>>8)] = 0x0FFFF & REG[((0x0700 & word)>>8)];
+        REG[((0x0700 & word)>>8)] = 0x0FFFF - REG[((0x0700 & word)>>8)];
         overflow = true;
 	}
 }
