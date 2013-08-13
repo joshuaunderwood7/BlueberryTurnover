@@ -25,15 +25,20 @@ function SEQ(word)
 //result in Rd.
 function ADD(word)
 {
-    var testbit = REG[((0x0700 & word)>>8)]
+    var testbit = REG[((0x0700 & word)>>8)] >> 15;
+
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] + REG[((0x001C & word)>>2)])
 	carry = false;
     overflow = false;
     //check overflow/carry
     if(REG[((0x0700 & word)>>8)] > 0xFFFF) { carry  = true; } 
-    if( ((~( REG[((0x00E0 & word)>>5)] ^ REG[((0x001C & word)>>2)] ) >> 15) == 1) && (((REG[((0x0700 & word)>>8)] ^ testbit) >> 15) == 1)) 
-    { overflow  = true; }
+
 	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0xFFFF;
+
+    if( (REG[((0x00E0 & word)>>5)] >> 15) != testbit ) 
+    { overflow  = true; }
+
+    
 }
 
 //SGT Rd Rs1 Rs2
@@ -53,15 +58,18 @@ function SGT(word)
 //sign-extended immediate.
 function ADDI(word)
 {
-    var testbit = REG[((0x0700 & word)>>8)]
+    var testbit = REG[((0x0700 & word)>>8)] >> 15;
+    
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] + (0x001F & word))
 	carry = false;
     overflow = false;
     //check overflow/carry
     if(REG[((0x0700 & word)>>8)] > 0xFFFF) { carry  = true; } 
-    if( ((~( REG[((0x00E0 & word)>>5)] ^ (0x001F & word) ) >> 15) == 1) && (((REG[((0x0700 & word)>>8)] ^ testbit) >> 15) == 1)) 
-    { overflow  = true; }
+    
 	REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] & 0x0FFFF;
+    
+    if( (REG[((0x00E0 & word)>>5)] >> 15) != testbit ) 
+    { overflow  = true; }
 }
 
 //SUB Rd Rs1 Rs2
@@ -71,10 +79,12 @@ function SUB(word)
 	REG[((0x0700 & word)>>8)] =(REG[((0x00E0 & word)>>5)] - REG[((0x001C & word)>>2)])
 	//check underflow
     overflow = false;
+    
+    //handle overflow
 	if ( (REG[((0x0700 & word)>>8)] & 0x10000 ) == 0x10000 ) {
-		REG[((0x0700 & word)>>8)] = (0x0FFFF & ~REG[((0x0700 & word)>>8)]) + 0x0001; //manual two's complement
+		REG[((0x0700 & word)>>8)] = (0x0FFFF & REG[((0x0700 & word)>>8)]); //Keep the two's complement
         overflow = true;
-	}
+    }
 }
 
 //SLT Rd Rs1 Rs2
@@ -295,9 +305,9 @@ function BC(word)
 {
     if(carry)
     {
-        if( word & 0x0400 == 0x0400 ) 
+        if( (word & 0x0400) == 0x0400 ) 
         { 
-            PC = ( (PC + (word & 0x07FF) | 0xF400 )  & 0x0FFFF );
+            PC = ( (PC + ((word & 0x07FF) | 0xFC00 ))  & 0x0FFFF );
         }
         else
         {
@@ -313,11 +323,14 @@ function BO(word)
 {
     if(overflow)
     {
-        if( word & 0x0400 == 0x0400 ) 
+        if( (word & 0x0400) == 0x0400 ) 
         { 
-            word = 0x03FF - word;
+            PC = ( (PC + ((word & 0x07FF) | 0xFC00 ))  & 0x0FFFF );
         }
-        PC = PC + word;
+        else
+        {
+            PC = ( (PC + (word & 0x07FF) ) & 0x0FFFF );
+        }
     }
 }
 
