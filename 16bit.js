@@ -137,7 +137,7 @@ function XOR(word)
 //and Rs2.
 function XNOR(word)
 {
-    REG[((0x0700 & word)>>8)] = (~(REG[((0x00E0 & word)>>5)] ^ REG[((0x001C & word)>>2)]));
+    REG[((0x0700 & word)>>8)] = (((~(REG[((0x00E0 & word)>>5)]) & 0x0FFFF) ^ REG[((0x001C & word)>>2)]));
 }
 
 //NOT Rd Rs
@@ -145,7 +145,7 @@ function XNOR(word)
 //Rs.
 function NOT(word)
 {
-    REG[((0x0700 & word)>>8)] = (~(REG[((0x00E0 & word)>>5)]));
+    REG[((0x0700 & word)>>8)] = (~(REG[((0x00E0 & word)>>5)]) & 0x0FFFF);
 }
 
 //SRA Rd Rs #
