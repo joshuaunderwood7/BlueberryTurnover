@@ -72,8 +72,7 @@ function SUB(word)
 	//check underflow
     overflow = false;
 	if ( (REG[((0x0700 & word)>>8)] & 0x10000 ) == 0x10000 ) {
-		REG[((0x0700 & word)>>8)] = 0x0FFFF & REG[((0x0700 & word)>>8)];
-        REG[((0x0700 & word)>>8)] = 0x0FFFF - REG[((0x0700 & word)>>8)];
+		REG[((0x0700 & word)>>8)] = (0x0FFFF & ~REG[((0x0700 & word)>>8)]) + 0x0001; //manual two's complement
         overflow = true;
 	}
 }
