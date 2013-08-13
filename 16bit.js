@@ -169,9 +169,9 @@ function SRA(word)
 function SRL(word)
 {
     var temp = (REG[((0x00E0 & word)>>5)]);
-    for(var x=0; x < 0x001F & word; x+=1)
+    for(var x=0; x < (0x001F & word); x+=1)
     {
-        temp = ((temp >> 1) & (temp & 0x7FFF)); 
+        temp = ((temp >> 1) & (0x7FFF)); 
     }
     REG[((0x0700 & word)>>8)] = temp;
 }
