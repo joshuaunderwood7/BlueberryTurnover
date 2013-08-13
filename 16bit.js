@@ -178,14 +178,14 @@ function SRL(word)
 
 //SLL Rd Rs #
 //Store in register Rd the zero-extended value
-//of Rs shifted to the left by the 2-bit
+//of Rs shifted to the left by the 5-bit
 //immediate.
 function SLL(word)
 {
     var temp = (REG[((0x00E0 & word)>>5)]);
-    for(var x=0; x < 0x001F & word; x+=1)
+    for(var x=0; x < (0x001F & word); x+=1)
     {
-        temp = ((temp << 1) & (temp & 0xFFFE)) ;
+        temp = ((temp << 1) & (0xFFFE)) ;
     }
     REG[((0x0700 & word)>>8)] = temp;
 }
