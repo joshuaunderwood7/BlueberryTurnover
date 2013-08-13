@@ -155,9 +155,9 @@ function NOT(word)
 function SRA(word)
 {
     var temp = (REG[((0x00E0 & word)>>5)]);
-    for(var x=0; x < 0x001F & word; x+=1)
+    for(var x=0; x < (0x001F & word); x+=1)
     {
-        temp = ((temp >> 1) & (temp & 0x8000)) ;
+        temp = ((temp >> 1) | (temp & 0x8000)) ;
     }
     REG[((0x0700 & word)>>8)] = temp;
 }
