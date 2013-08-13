@@ -205,13 +205,13 @@ function SW(word)
 //store the result in Rd.
 function MUL(word)
 {
-	REG[((0x0700 & word)>>8)] =((REG[((0x00E0 & word)>>5)] & 0x00FF) + (REG[((0x001C & word)>>2)] & 0x00FF));
-    //check overflow
+	REG[((0x0700 & word)>>8)] =((REG[((0x00E0 & word)>>5)] & 0x00FF) * (REG[((0x001C & word)>>2)] & 0x00FF));
+    //check overflow unneeded
 }
 
 // UNUSED 00110 
 
-//LR Rd 0 Raddr
+//LW Rd 0 Raddr
 //Load the word value at memory address
 //Raddr into Rd. (You can assume that address
 //is an even number and the compiler inserts 3
@@ -227,7 +227,7 @@ function LW(word)
 function LBI(word)
 {
     REG[((0x0700 & word)>>8)] = (word & 0x00FF);
-    if( (word & 0x0070) != 0 )
+    if( (word & 0x0080) != 0 )
     {
         REG[((0x0700 & word)>>8)] = REG[((0x0700 & word)>>8)] | 0xFF00;
     }
@@ -245,9 +245,10 @@ function LBIU(word)
 //Write the 8-bit immediate into the upper 8
 //bits of register Rd and optionally clear the
 //low order 8 bits.
+//(does not clear lower 8 bits!)
 function LHI(word)
 {
-    REG[((0x0700 & word)>>8)] = ((word << 8) & 0xFF00);
+    REG[((0x0700 & word)>>8)] = ((word << 8) & 0xFF00) | ( REG[((0x0700 & word)>>8)] & 0x00FF );
 }
 
 //BEQZ Rs #
