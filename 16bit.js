@@ -258,7 +258,14 @@ function BEQZ(word)
 {
     if( REG[((0x0700 & word)>>8)] == 0 )
     {
-        PC = (word & 0x00FF);
+        if( (word & 0x0080) == 0)
+        {
+            PC = ( (PC + (word & 0x00FF)) & 0x0FFFF );
+        }
+        else
+        {
+            PC = ( (PC + ((word & 0x00FF) | 0xFF00) ) & 0x0FFFF );
+        }
     }
 }
 
@@ -270,7 +277,14 @@ function BNEZ(word)
 {
     if( REG[((0x0700 & word)>>8)] != 0 )
     {
-        PC = (word & 0x00FF);
+        if( (word & 0x0080) == 0)
+        {
+            PC = ( (PC + (word & 0x00FF)) & 0x0FFFF );
+        }
+        else
+        {
+            PC = ( (PC + ((word & 0x00FF) | 0xFF00) ) & 0x0FFFF );
+        }
     }
 }
 
@@ -283,9 +297,12 @@ function BC(word)
     {
         if( word & 0x0400 == 0x0400 ) 
         { 
-            word = 0x03FF - word;
+            PC = ( (PC + (word & 0x07FF) | 0xF400 )  & 0x0FFFF );
         }
-        PC = PC + word;
+        else
+        {
+            PC = ( (PC + (word & 0x07FF) ) & 0x0FFFF );
+        }
     }
 }
 
