@@ -473,20 +473,27 @@ function RUNPROGRAM()
     PC = 0;
 
     document.getElementById("output").innerHTML = ""; 
-    for(var i = 0; i < 8000 && !halt; i++)
-    {
-        document.getElementById("output").innerHTML += formatHex(MEMORY[PC]) + " <br />"; 
-        EXECUTE(MEMORY[PC]);
-        PC++;
-        document.getElementById("PC").innerHTML = "PC = " + PC;
-    }
+  
+    setTimeout(CONTINUE, 0, 1000);
+}
 
+function CONTINUE(timeout)
+{
+    if(halt) return; //end program if halted
+
+    // Execute and step
+    document.getElementById("output").innerHTML += formatHex(MEMORY[PC]) + " <br />"; 
+    EXECUTE(MEMORY[PC]);
+    PC++;
+    document.getElementById("PC").innerHTML = "PC = " + PC;
+
+    // Display-update registers
     for(var i = 0; i < 8; i++)
     { 
         document.getElementById("REG"+i).innerHTML=("REG" + i + " = " + formatHex(REG[i]) + "  "); 
     }
-    
-    
+
+    // Display-update 
     document.getElementById("MEMORY").innerHTML = "";
     for(var i = 0; i < 256; i++)
     {
@@ -496,7 +503,8 @@ function RUNPROGRAM()
         }
         document.getElementById("MEMORY").innerHTML += formatHex(MEMORY[i]) + "  ";
     }
- 
+
+    setTimeout(CONTINUE, timeout, timeout);
 }
 
 function HALT()
